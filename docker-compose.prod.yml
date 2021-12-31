@@ -1,0 +1,29 @@
+version: '3.4'
+
+services:
+    postgres:
+        image: postgres:12-alpine
+        ports:
+            - "5432:5432"
+        environment:
+            - POSTGRES_DB=prod
+            - POSTGRES_USER=postgres
+            - PGUSER=postgres
+            - POSTGRES_PASSWORD=password
+            - POSTGRES_HOST_AUTH_METHOD=trust
+            - PGGSSENCMODE=disable
+        volumes:
+            - "./dbdata:/var/lib/postgresql/data"
+    server:
+        build:
+            context: .
+            target: nestjs-prod
+        ports:
+            - "3000:3000"
+        environment:
+            - ENV=production
+        volumes:
+            - "./:/usr/src/app/"
+        command: "yarn run start:prod"
+        depends_on:
+            - postgres
