@@ -6,7 +6,7 @@ services:
         ports:
             - "5432:5432"
         environment:
-            - POSTGRES_DB=prod
+            - POSTGRES_DB=workspace
             - POSTGRES_USER=postgres
             - PGUSER=postgres
             - POSTGRES_PASSWORD=password

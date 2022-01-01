@@ -60,11 +60,15 @@ export class SurveyController {
     )
     id: string,
   ): Promise<SurveyRes> {
-    const data = await this.queryBus.execute(new GetSurveyQuery(id));
+    const survey = await this.queryBus.execute(new GetSurveyQuery(id));
+
+    if (!survey) {
+      throw new HttpException('Survey not found', HttpStatus.NOT_FOUND);
+    }
 
     return {
-      success: !!data,
-      data,
+      success: true,
+      data: survey,
     };
   }
 
@@ -104,6 +108,11 @@ export class SurveyController {
     )
     id: string,
   ): Promise<DeleteRes> {
+    const survey = await this.queryBus.execute(new GetSurveyQuery(id));
+    if (!survey) {
+      throw new HttpException('Survey not found', HttpStatus.NOT_FOUND);
+    }
+
     await this.commandBus.execute(new DeleteSurveyCommand(id));
 
     return { success: true };

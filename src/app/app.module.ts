@@ -17,7 +17,7 @@ import { SurveyModule } from '@survey/survey.module';
       port: 5432,
       username: 'postgres',
       password: 'password',
-      database: 'dev',
+      database: 'workspace',
       entities: [...entities],
       synchronize: true,
     }),
