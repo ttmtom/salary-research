@@ -28,7 +28,7 @@ export class Salary {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column('decimal', { precision: 10, scale: 2 })
+  @Column('decimal', { precision: 13, scale: 2 })
   amount: number;
 
   @Column({
@@ -48,11 +48,11 @@ export class CareerInfo {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Industry, { eager: true })
-  industry: Industry;
+  @ManyToOne(() => Industry, { eager: true, nullable: true })
+  industry?: Industry;
 
-  @ManyToOne(() => Title, { eager: true })
-  title: Title;
+  @ManyToOne(() => Title, { eager: true, nullable: true })
+  title?: Title;
 
   @OneToOne(() => Salary, { eager: true })
   @JoinColumn()

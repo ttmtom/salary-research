@@ -8,5 +8,6 @@ export enum Curreny {
   HKD = 'HKD',
   JPY = 'JPY',
   ZAR = 'ZAR',
+  CHF = 'CHF',
   Other = 'Other',
 }
