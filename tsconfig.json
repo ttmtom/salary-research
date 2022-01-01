@@ -20,8 +20,8 @@
     "paths": {
       "@constants/*": ["src/constants/*"],
       "@app/*": ["src/app/*"],
-      "@entities/*": ["src/entities/*"],
-      "@db/*": ["src/db"]
+      "@db/*": ["src/db/*"],
+      "@survey/*": ["src/survey/*"],
     }
   }
 }

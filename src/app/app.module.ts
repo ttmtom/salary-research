@@ -1,8 +1,11 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
-import { connectionName } from 'src/db/connection';
-import entities from 'src/entities';
+import { connectionName } from '@db/connection';
+import entities from '@db/entities';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { SurveyModule } from '@survey/survey.module';
 
 @Module({
   imports: [
@@ -18,6 +21,9 @@ import entities from 'src/entities';
       entities: [...entities],
       synchronize: true,
     }),
+    SurveyModule,
   ],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}

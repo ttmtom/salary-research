@@ -19,10 +19,12 @@ export class RespondentInfo {
   })
   ageGroup: AgeGroup;
 
-  @OneToOne(() => Address)
+  @OneToOne(() => Address, { eager: true })
   @JoinColumn()
   address: Address;
 
-  @Column('text')
-  other: string;
+  constructor(ageGroup: AgeGroup, address: Address) {
+    this.ageGroup = ageGroup;
+    this.address = address;
+  }
 }

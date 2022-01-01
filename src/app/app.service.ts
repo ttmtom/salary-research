@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { PingDto } from './responseType/pingDto';
+import { PingRes } from './responseType/pingRes';
 
 @Injectable()
 export class AppService {
-  sayHello(): PingDto {
+  sayHello(): PingRes {
     return {
       message: 'Hello World!',
     };

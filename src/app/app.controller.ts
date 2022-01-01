@@ -1,7 +1,7 @@
 import { Controller, Get, HttpCode } from '@nestjs/common';
 import { AppService } from './app.service';
 import { ApiTags } from '@nestjs/swagger';
-import { PingDto } from './responseType/pingDto';
+import { PingRes } from './responseType/pingRes';
 
 @ApiTags('Root')
 @Controller()
@@ -10,7 +10,7 @@ export class AppController {
 
   @Get('/ping')
   @HttpCode(200)
-  pingServer(): PingDto {
+  pingServer(): PingRes {
     return this.appService.sayHello();
   }
 }
