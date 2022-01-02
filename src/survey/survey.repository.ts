@@ -253,9 +253,6 @@ export class SurveyRepository implements ISurveyRepository {
       .select(['salary.amount', 'salary.currency'])
       .execute();
 
-    console.log('----- ');
-    console.log(data);
-
     return data;
   }
 }
