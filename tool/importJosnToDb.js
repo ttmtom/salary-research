@@ -82,59 +82,65 @@ const loadDataToDb = async () => {
 
   for (let i = 0; i < importJson.length; i++) {
     console.log(`---- insert ${i} row ----`);
-    const [
-      timestamp,
-      ageGroup,
-      industry,
-      title,
-      salary,
-      currency,
-      address,
-      experience,
-      additional,
-      other,
-    ] = Object.values(importJson[i]);
+    try {
+      const [
+        timestamp,
+        ageGroup,
+        industry,
+        title,
+        salary,
+        currency,
+        address,
+        experience,
+        additional,
+        other,
+      ] = Object.values(importJson[i]);
 
-    const [city, state, country] = convertAddresStrToArr(address);
-    const dbCountry = country ? await getOrCreate('country', country) : null;
-    const dbState = state ? await getOrCreate('state', state) : null;
-    const dbCity = city ? await getOrCreate('city', city) : null;
-    const dbAddress = await insertToTable('address', {
-      cityId: dbCity ? dbCity.id : null,
-      stateId: dbState ? dbState.id : null,
-      countryId: dbCountry ? dbCountry.id : null,
-    });
-    const ageEnum = convertAgeStrToEnum(ageGroup);
-    const dbRespondentInfo = await insertToTable('respondent_info', {
-      ageGroup: ageEnum,
-      addressId: dbAddress.id,
-    });
+      const [city, state, country] = convertAddresStrToArr(address);
+      const dbCountry = country ? await getOrCreate('country', country) : null;
+      const dbState = state ? await getOrCreate('state', state) : null;
+      const dbCity = city ? await getOrCreate('city', city) : null;
+      const dbAddress = await insertToTable('address', {
+        cityId: dbCity ? dbCity.id : null,
+        stateId: dbState ? dbState.id : null,
+        countryId: dbCountry ? dbCountry.id : null,
+      });
+      const ageEnum = convertAgeStrToEnum(ageGroup);
+      const dbRespondentInfo = await insertToTable('respondent_info', {
+        ageGroup: ageEnum,
+        addressId: dbAddress.id,
+      });
 
-    const dbIndustry = industry
-      ? await getOrCreate('industry', industry)
-      : null;
-    const dbTitle = title ? await getOrCreate('title', title) : null;
-    const salaryNum = convertSalaryStrToNum(salary);
-    const dbSalary = await insertToTable('salary', {
-      amount: salaryNum,
-      currency: currency,
-    });
-    const experienceGroup = convertExperienceStrToEnum(experience);
-    const dbCareerInfo = await insertToTable('career_info', {
-      experienceGroup,
-      additional,
-      industryId: dbIndustry ? dbIndustry.id : null,
-      titleId: dbTitle ? dbTitle.id : null,
-      salaryId: dbSalary.id,
-    });
+      const dbIndustry = industry
+        ? await getOrCreate('industry', industry)
+        : null;
+      const dbTitle = title ? await getOrCreate('title', title) : null;
+      const salaryNum = convertSalaryStrToNum(salary);
+      const dbSalary = await insertToTable('salary', {
+        amount: salaryNum,
+        currency: currency,
+      });
+      const experienceGroup = convertExperienceStrToEnum(experience);
+      const dbCareerInfo = await insertToTable('career_info', {
+        experienceGroup,
+        additional,
+        industryId: dbIndustry ? dbIndustry.id : null,
+        titleId: dbTitle ? dbTitle.id : null,
+        salaryId: dbSalary.id,
+      });
 
-    await insertToTable('survey', {
-      timestamp,
-      other,
-      respondentInfoId: dbRespondentInfo.id,
-      careerInfoId: dbCareerInfo.id,
-    });
-    console.log(`---- insert ${i} row done ----`);
+      await insertToTable('survey', {
+        timestamp,
+        other,
+        respondentInfoId: dbRespondentInfo.id,
+        careerInfoId: dbCareerInfo.id,
+      });
+      console.log(`---- insert ${i} row done ----`);
+    } catch (err) {
+      console.log(`---- insert ${i} row error ----`);
+      console.log(err);
+      console.log(`---- error end ----`);
+    }
     if (i === importJson.length - 1) {
       knex.destroy();
     }

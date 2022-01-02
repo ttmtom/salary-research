@@ -1,8 +1,9 @@
 import { Survey } from '@db/entities/survey';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { FindConditions } from 'typeorm';
 import { connectionName } from '@db/connection';
-import { Repository, Like } from 'typeorm';
+import { Repository, Like, In } from 'typeorm';
 import {
   Address,
   CareerInfo,
@@ -17,12 +18,13 @@ import {
 import { CreateSurveytDto } from './dto/CreateSurvey.dto';
 import { UpdateSurveytDto } from './dto/UpdateSurvey.dto';
 import { Currency } from '@constants/currency';
+import { FilterSurveytDto } from './dto/FilterSurvey.dto';
 
 export interface ISurveyRepository {
   save(survey: Survey): Promise<Survey>;
   saveForm(data: CreateSurveytDto): Promise<Survey>;
   deleteByIds(ids: string[]): void;
-  findAll(): Promise<Survey[]>;
+  findAll(from: number, to: number): Promise<Survey[]>;
   findBySurveyId(id: string): Promise<Survey>;
   findBySurveyIds(ids: string[]): Promise<Survey[]>;
 }
@@ -233,8 +235,11 @@ export class SurveyRepository implements ISurveyRepository {
     return resp;
   }
 
-  findAll(): Promise<Survey[]> {
-    return this.surveyRepository.find();
+  findAll(from = 0, to = 200): Promise<Survey[]> {
+    return this.surveyRepository.find({
+      skip: from,
+      take: to - from,
+    });
   }
 
   async findBySurveyIds(ids: string[]): Promise<Survey[]> {
@@ -252,6 +257,113 @@ export class SurveyRepository implements ISurveyRepository {
       .where('title.name like :keyword', { keyword: `%${keyword}%` })
       .select(['salary.amount', 'salary.currency'])
       .execute();
+
+    return data;
+  }
+
+  private getFilterWHereObj(
+    filterSurveytDto: FilterSurveytDto,
+  ): FindConditions<Survey> {
+    const whereObj: FindConditions<Survey> = {};
+
+    if (filterSurveytDto.industry) {
+      whereObj.careerInfo = {
+        ...whereObj.careerInfo,
+        industry: {
+          name: Like(`%${filterSurveytDto.industry}%`),
+        },
+      };
+    }
+    if (filterSurveytDto.title) {
+      whereObj.careerInfo = {
+        ...whereObj.careerInfo,
+        title: {
+          name: Like(`%${filterSurveytDto.title}%`),
+        },
+      };
+    }
+    if (filterSurveytDto.currency) {
+      whereObj.careerInfo = {
+        ...whereObj.careerInfo,
+        salary: {
+          currency: In(filterSurveytDto.currency),
+        },
+      };
+    }
+
+    if (filterSurveytDto.city) {
+      whereObj.respondentInfo = {
+        ...whereObj.respondentInfo,
+        address: {
+          city: {
+            name: Like(`%${filterSurveytDto.city}%`),
+          },
+        },
+      };
+    }
+    if (filterSurveytDto.state) {
+      whereObj.respondentInfo = {
+        ...whereObj.respondentInfo,
+        address: {
+          state: {
+            name: Like(`%${filterSurveytDto.state}%`),
+          },
+        },
+      };
+    }
+    if (filterSurveytDto.country) {
+      whereObj.respondentInfo = {
+        ...whereObj.respondentInfo,
+        address: {
+          country: {
+            name: Like(`%${filterSurveytDto.country}%`),
+          },
+        },
+      };
+    }
+
+    if (filterSurveytDto.ageGroup) {
+      const { ageGroup } = filterSurveytDto;
+      if (ageGroup.length === 1) {
+        whereObj.respondentInfo = {
+          ...whereObj.respondentInfo,
+          ageGroup: In(ageGroup),
+        };
+      }
+    }
+
+    if (filterSurveytDto.experience) {
+      const { experience } = filterSurveytDto;
+      if (experience.length === 1) {
+        whereObj.careerInfo = {
+          ...whereObj.careerInfo,
+          experienceGroup: In(experience),
+        };
+      }
+    }
+
+    return whereObj;
+  }
+
+  async selectFilterSurvey(
+    filterSurveytDto: FilterSurveytDto,
+  ): Promise<Survey[]> {
+    const whereObj = this.getFilterWHereObj(filterSurveytDto);
+
+    const data = await this.surveyRepository.find({
+      relations: [
+        'careerInfo',
+        'careerInfo.title',
+        'careerInfo.industry',
+        'careerInfo.salary',
+        'respondentInfo',
+        'respondentInfo.address',
+        'respondentInfo.address.city',
+        'respondentInfo.address.state',
+        'respondentInfo.address.country',
+      ],
+      where: whereObj,
+    });
 
     return data;
   }

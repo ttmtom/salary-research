@@ -20,11 +20,14 @@ import { DeleteSurveyCommand } from './commands/deleteSurvey/deleteSurvey.comman
 import { InsertSurveyCommand } from './commands/insertSurvey/insertSurvey.command';
 import { UpdateSurveyCommand } from './commands/updateSurvey/updateSurvey.command';
 import { CreateSurveytDto } from './dto/CreateSurvey.dto';
+import { FilterSurveytDto } from './dto/FilterSurvey.dto';
 import { UpdateSurveytDto } from './dto/UpdateSurvey.dto';
+import { GetFilterSurveyQuery } from './queries/getFilterSurvey/getFilterSurvey.query';
 import { GetSalaryAveragerQuery } from './queries/getSalaryAverager/getSalaryAverager.query';
 import { GetSurveyQuery } from './queries/getSurvey/getSurvey.query';
 import { AverageSalaryRes } from './response/averageSalary';
 import { DeleteRes } from './response/deleteRes';
+import { FilteredSurveyRes } from './response/filteredSurveyRes';
 import { SurveyRes } from './response/surveyRes';
 import { SurveysRes } from './response/surveysRes';
 
@@ -37,12 +40,37 @@ export class SurveyController {
   ) {}
 
   @Get('/')
-  async getAllSurvey(): Promise<SurveysRes> {
-    const data = await this.queryBus.execute(new GetSurveyQuery());
+  @ApiQuery({ name: 'from', type: Number, required: false })
+  @ApiQuery({ name: 'to', type: Number, required: false })
+  async getAllSurvey(
+    @Query(
+      'from',
+      new DefaultValuePipe(0),
+      new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE }),
+    )
+    from: number,
+    @Query(
+      'to',
+      new DefaultValuePipe(200),
+      new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE }),
+    )
+    to: number,
+  ): Promise<SurveysRes> {
+    if (from < 0 || to < 0) {
+      throw new HttpException(
+        'from and to params should a positive number',
+        HttpStatus.NOT_ACCEPTABLE,
+      );
+    }
+    if (from > to) {
+      throw new HttpException('not a vaild range', HttpStatus.NOT_ACCEPTABLE);
+    }
 
-    return {
-      data,
-    };
+    const data = await this.queryBus.execute(
+      new GetSurveyQuery(null, null, from, to),
+    );
+
+    return { data };
   }
 
   @Put('/')
@@ -142,9 +170,44 @@ export class SurveyController {
     const average = await this.queryBus.execute(
       new GetSalaryAveragerQuery(currency, title),
     );
+
+    if (!average) {
+      throw new HttpException('No related title', HttpStatus.NOT_FOUND);
+    }
+
     return {
       currency,
       average,
+    };
+  }
+
+  @Post('/data/filter')
+  async getFilteredData(
+    @Body() filterSurveytDto: FilterSurveytDto,
+  ): Promise<FilteredSurveyRes> {
+    if (Object.keys(filterSurveytDto).length === 0) {
+      throw new HttpException(
+        'Empty object not allowed',
+        HttpStatus.NOT_ACCEPTABLE,
+      );
+    }
+    if (
+      (filterSurveytDto.ageGroup && !filterSurveytDto.ageGroup.length) ||
+      (filterSurveytDto.experience && !filterSurveytDto.experience.length)
+    ) {
+      throw new HttpException(
+        'Empty array not allowed',
+        HttpStatus.NOT_ACCEPTABLE,
+      );
+    }
+
+    const surveys = await this.queryBus.execute(
+      new GetFilterSurveyQuery(filterSurveytDto),
+    );
+
+    return {
+      success: true,
+      data: surveys,
     };
   }
 }

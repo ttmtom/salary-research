@@ -43,6 +43,7 @@ export class GetSalaryAveragerHandler
       );
       return amount.add(accum);
     }, Money(0));
+
     return sum.divide(salaryData.length).value;
   }
 }

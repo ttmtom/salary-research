@@ -25,7 +25,6 @@ export class Survey {
 
   @Column('text')
   other: string;
-  survey: any;
 
   constructor(
     respondentInfo: RespondentInfo,

@@ -22,7 +22,7 @@ export class GetSurveyHandler
     } else if (query.ids) {
       return this.repository.findBySurveyIds(query.ids);
     } else {
-      return this.repository.findAll();
+      return this.repository.findAll(query.from, query.to);
     }
   }
 }
