@@ -15,7 +15,7 @@ import {
   DefaultValuePipe,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { ApiTags, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiQuery, ApiOperation } from '@nestjs/swagger';
 import { DeleteSurveyCommand } from './commands/deleteSurvey/deleteSurvey.command';
 import { InsertSurveyCommand } from './commands/insertSurvey/insertSurvey.command';
 import { UpdateSurveyCommand } from './commands/updateSurvey/updateSurvey.command';
@@ -40,6 +40,7 @@ export class SurveyController {
   ) {}
 
   @Get('/')
+  @ApiOperation({ summary: 'Get all survey default row 0 to row 200' })
   @ApiQuery({ name: 'from', type: Number, required: false })
   @ApiQuery({ name: 'to', type: Number, required: false })
   async getAllSurvey(
@@ -74,6 +75,7 @@ export class SurveyController {
   }
 
   @Put('/')
+  @ApiOperation({ summary: 'Insert a new survey' })
   async insertSurvey(
     @Body() createSurveytDto: CreateSurveytDto,
   ): Promise<SurveyRes> {
@@ -87,6 +89,7 @@ export class SurveyController {
   }
 
   @Get('/:id')
+  @ApiOperation({ summary: 'Get survey by id' })
   async getSurvey(
     @Param(
       'id',
@@ -107,6 +110,7 @@ export class SurveyController {
   }
 
   @Post('/:id')
+  @ApiOperation({ summary: 'update survey by id' })
   async updateSurvey(
     @Body() updateSurveytDto: UpdateSurveytDto,
     @Param(
@@ -135,6 +139,7 @@ export class SurveyController {
   }
 
   @Delete('/:id')
+  @ApiOperation({ summary: 'Delete survey by id' })
   async deleteSurvey(
     @Param(
       'id',
@@ -153,6 +158,10 @@ export class SurveyController {
   }
 
   @Get('/salary/averager')
+  @ApiOperation({
+    summary:
+      'Get averager salary by title keyword, default currency is HKD. Other currency has same rate with HKD',
+  })
   @ApiQuery({ name: 'currency', enum: Currency, required: false })
   @ApiQuery({ name: 'title', type: String })
   async getAveragerSalary(
@@ -181,9 +190,10 @@ export class SurveyController {
     };
   }
 
-  @Post('/data/filter')
+  @Get('/data/filter')
+  @ApiOperation({ summary: 'Post a filter object and return the match survey' })
   async getFilteredData(
-    @Body() filterSurveytDto: FilterSurveytDto,
+    @Query() filterSurveytDto: FilterSurveytDto,
   ): Promise<FilteredSurveyRes> {
     if (Object.keys(filterSurveytDto).length === 0) {
       throw new HttpException(

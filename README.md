@@ -1,33 +1,17 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
-</p>
-
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+# Salery survey
 
 ## Description
+Storing survey result in to database and provide api to insert, get and filter data result.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Salary survey API server using Typescript, Nest.js, Postgres.
+Using docker compose to ship the app.
 
 ## Installation
 
+```bash
+$ yarn install
+```
+or
 ```bash
 $ npm install
 ```
@@ -36,38 +20,52 @@ $ npm install
 
 ```bash
 # development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+$ docker-compose up
 ```
 
-## Test
+open swagger api doc in `localhost:3000/api`
 
 ```bash
-# unit tests
-$ npm run test
+# production mode
+$ docker-compose -f docker-compose.prod.yml up
+```
+open swagger api doc in `localhost:8080/api`
 
-# e2e tests
-$ npm run test:e2e
+Path                    | Method | description                          | example
+------------------------|--------|--------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+/ping                   | GET    | server health check                  | `curl -X 'GET' 'http://localhost:3000/ping' -H 'accept: */*'`
+/survey                 | GET    | Get all survey.                      | `curl -X 'GET' 'http://localhost:3000/survey?from=1&to=100' -H 'accept: */*'`
+/survey                 | PUT    | insert a new survey                  | `curl -X 'PUT' 'http://localhost:3000/survey' -H 'accept: */*' -H 'Content-Type: application/json'  -d '{"ageGroup": "0-18",  "industry": "industry",  "title": "industry","salary": 1000,"currency": "GBP","city": "city","state": "state","country": "country","experience": "0-1","additional": "","other": ""}'`
+/survey/{id}            | GET    | Get survey by ID                     | `curl -X 'GET' 'http://localhost:3000/survey/3'  -H 'accept: */*'`
+/survey/{id}            | POST   | update survey by ID                  | `curl -X 'POST' 'http://localhost:3000/survey/3' -H 'accept: */*' -H 'Content-Type: application/json' -d '{"other": "string"}'`
+/survey/{id}            | DELETE | delete survey by ID                  | `curl -X 'DELETE' 'http://localhost:3000/survey/3' -H 'accept: */*'`
+/survey/salary/averager | GET    | get averager salary by title keyword | `curl -X 'GET' 'http://localhost:3000/survey/salary/averager?title=manager&currency=JPY' -H 'accept: */*'`
+/survey/data/filter     | GET    | get survey with filter param         | `curl -X 'GET' 'http://localhost:3000/survey/data/filter?ageGroup=25-34&title=manager' -H 'accept: */*'`
 
-# test coverage
-$ npm run test:cov
+
+## Database Schema
+![database schema](public/images/database.jpg)
+
+## Script to import data json
+
+```bash
+$ node tool/importJosnToDb.js path/to/data.json (databaseHost:default=localhost) (databasePort:default=5432)
 ```
 
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
+Data json sample:
+```json
+[
+  {
+    "Timestamp": "4/24/2019 11:43:21", // timestamp
+    "How old are you?": "35-44", // ageGroup
+    "What industry do you work in?": "Government", // industry
+    "Job title": "Talent Management Asst. Director", // title
+    "What is your annual salary?": "75000", // amount
+    "Please indicate the currency": "USD", // currency
+    "Where are you located? (City/state/country)": "Nashville, TN", // city/state/country
+    "How many years of post-college professional work experience do you have?": "11 - 20 years", // experience
+    "If your job title needs additional context, please clarify here:": "", // additional
+    "If \"Other,\" please indicate the currency here:": "" // other
+  },
+]
+```

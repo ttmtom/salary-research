@@ -283,12 +283,21 @@ export class SurveyRepository implements ISurveyRepository {
       };
     }
     if (filterSurveytDto.currency) {
-      whereObj.careerInfo = {
-        ...whereObj.careerInfo,
-        salary: {
-          currency: In(filterSurveytDto.currency),
-        },
-      };
+      if (Array.isArray(filterSurveytDto.currency)) {
+        whereObj.careerInfo = {
+          ...whereObj.careerInfo,
+          salary: {
+            currency: In(filterSurveytDto.currency),
+          },
+        };
+      } else {
+        whereObj.careerInfo = {
+          ...whereObj.careerInfo,
+          salary: {
+            currency: filterSurveytDto.currency,
+          },
+        };
+      }
     }
 
     if (filterSurveytDto.city) {
@@ -324,20 +333,30 @@ export class SurveyRepository implements ISurveyRepository {
 
     if (filterSurveytDto.ageGroup) {
       const { ageGroup } = filterSurveytDto;
-      if (ageGroup.length === 1) {
+      if (Array.isArray(ageGroup)) {
         whereObj.respondentInfo = {
           ...whereObj.respondentInfo,
           ageGroup: In(ageGroup),
+        };
+      } else {
+        whereObj.respondentInfo = {
+          ...whereObj.respondentInfo,
+          ageGroup: ageGroup,
         };
       }
     }
 
     if (filterSurveytDto.experience) {
       const { experience } = filterSurveytDto;
-      if (experience.length === 1) {
+      if (Array.isArray(experience)) {
         whereObj.careerInfo = {
           ...whereObj.careerInfo,
           experienceGroup: In(experience),
+        };
+      } else {
+        whereObj.careerInfo = {
+          ...whereObj.careerInfo,
+          experienceGroup: experience,
         };
       }
     }
