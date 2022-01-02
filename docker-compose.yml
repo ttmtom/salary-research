@@ -5,8 +5,9 @@ services:
         image: postgres:12-alpine
         ports:
             - "5432:5432"
+        container_name: postgres-dev
         environment:
-            - POSTGRES_DB=dev
+            - POSTGRES_DB=workspace
             - POSTGRES_USER=postgres
             - PGUSER=postgres
             - POSTGRES_PASSWORD=password
@@ -18,6 +19,7 @@ services:
         build:
             context: .
             target: nestjs-dev
+        container_name: server-dev
         ports:
             - "3000:3000"
         environment:

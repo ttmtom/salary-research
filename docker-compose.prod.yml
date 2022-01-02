@@ -6,7 +6,7 @@ services:
         ports:
             - "5432:5432"
         environment:
-            - POSTGRES_DB=prod
+            - POSTGRES_DB=workspace
             - POSTGRES_USER=postgres
             - PGUSER=postgres
             - POSTGRES_PASSWORD=password
@@ -19,11 +19,9 @@ services:
             context: .
             target: nestjs-prod
         ports:
-            - "3000:3000"
+            - "8080:3000"
         environment:
             - ENV=production
-        volumes:
-            - "./:/usr/src/app/"
         command: "yarn run start:prod"
         depends_on:
             - postgres
