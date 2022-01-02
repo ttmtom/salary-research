@@ -2,7 +2,7 @@ import { Survey } from '@db/entities/survey';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { connectionName } from '@db/connection';
-import { Repository } from 'typeorm';
+import { Repository, Like } from 'typeorm';
 import {
   Address,
   CareerInfo,
@@ -16,6 +16,7 @@ import {
 } from '@db/entities';
 import { CreateSurveytDto } from './dto/CreateSurvey.dto';
 import { UpdateSurveytDto } from './dto/UpdateSurvey.dto';
+import { Currency } from '@constants/currency';
 
 export interface ISurveyRepository {
   save(survey: Survey): Promise<Survey>;
@@ -97,7 +98,7 @@ export class SurveyRepository implements ISurveyRepository {
       ageGroup,
       title,
       salary,
-      curreny,
+      currency,
       experience,
       additional,
       other,
@@ -121,7 +122,7 @@ export class SurveyRepository implements ISurveyRepository {
     const dbIndustry: Industry = await this.getOrCreateIndustry(industry);
     const dbTitle: Title = await this.getOrCreateTitle(title);
     const dbSalary: Salary = await this.salaryRepository.save(
-      new Salary(salary, curreny),
+      new Salary(salary, currency),
     );
     const dbCareerInfo: CareerInfo = await this.careerInfoRepository.save(
       new CareerInfo(
@@ -223,8 +224,8 @@ export class SurveyRepository implements ISurveyRepository {
   }
 
   async findBySurveyId(id: string): Promise<Survey> {
-    const wallets = await this.surveyRepository.findOne(id);
-    return wallets;
+    const surveys = await this.surveyRepository.findOne(id);
+    return surveys;
   }
 
   async save(survey: Survey): Promise<Survey> {
@@ -237,7 +238,24 @@ export class SurveyRepository implements ISurveyRepository {
   }
 
   async findBySurveyIds(ids: string[]): Promise<Survey[]> {
-    const wallets = await this.surveyRepository.findByIds(ids);
-    return wallets;
+    const surveys = await this.surveyRepository.findByIds(ids);
+    return surveys;
+  }
+
+  async findSalaryByTitle(
+    keyword: string,
+  ): Promise<{ salary_amount: number; salary_currency: Currency }[]> {
+    const data = await this.careerInfoRepository
+      .createQueryBuilder('career')
+      .leftJoinAndSelect('career.title', 'title')
+      .leftJoinAndSelect('career.salary', 'salary')
+      .where('title.name like :keyword', { keyword: `%${keyword}%` })
+      .select(['salary.amount', 'salary.currency'])
+      .execute();
+
+    console.log('----- ');
+    console.log(data);
+
+    return data;
   }
 }

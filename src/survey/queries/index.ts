@@ -1,5 +1,6 @@
 import { GetSurveyHandler } from './getSurvey/getSurvey.handler';
+import { GetSalaryAveragerHandler } from './getSalaryAverager/getSalaryAverager.handler';
 
-export { GetSurveyHandler };
+export { GetSurveyHandler, GetSalaryAveragerHandler };
 
-export default [GetSurveyHandler];
+export default [GetSurveyHandler, GetSalaryAveragerHandler];

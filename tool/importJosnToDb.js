@@ -88,7 +88,7 @@ const loadDataToDb = async () => {
       industry,
       title,
       salary,
-      curreny,
+      currency,
       address,
       experience,
       additional,
@@ -117,7 +117,7 @@ const loadDataToDb = async () => {
     const salaryNum = convertSalaryStrToNum(salary);
     const dbSalary = await insertToTable('salary', {
       amount: salaryNum,
-      curreny,
+      currency: currency,
     });
     const experienceGroup = convertExperienceStrToEnum(experience);
     const dbCareerInfo = await insertToTable('career_info', {

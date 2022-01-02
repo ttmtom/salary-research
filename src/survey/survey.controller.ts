@@ -1,3 +1,4 @@
+import { Currency } from '@constants/currency';
 import {
   Body,
   Controller,
@@ -7,17 +8,22 @@ import {
   HttpStatus,
   Param,
   ParseIntPipe,
+  ParseEnumPipe,
   Post,
   Put,
+  Query,
+  DefaultValuePipe,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiTags, ApiQuery } from '@nestjs/swagger';
 import { DeleteSurveyCommand } from './commands/deleteSurvey/deleteSurvey.command';
 import { InsertSurveyCommand } from './commands/insertSurvey/insertSurvey.command';
 import { UpdateSurveyCommand } from './commands/updateSurvey/updateSurvey.command';
 import { CreateSurveytDto } from './dto/CreateSurvey.dto';
 import { UpdateSurveytDto } from './dto/UpdateSurvey.dto';
+import { GetSalaryAveragerQuery } from './queries/getSalaryAverager/getSalaryAverager.query';
 import { GetSurveyQuery } from './queries/getSurvey/getSurvey.query';
+import { AverageSalaryRes } from './response/averageSalary';
 import { DeleteRes } from './response/deleteRes';
 import { SurveyRes } from './response/surveyRes';
 import { SurveysRes } from './response/surveysRes';
@@ -41,10 +47,10 @@ export class SurveyController {
 
   @Put('/')
   async insertSurvey(
-    @Body() createWalletDto: CreateSurveytDto,
+    @Body() createSurveytDto: CreateSurveytDto,
   ): Promise<SurveyRes> {
     const survey = await this.commandBus.execute(
-      new InsertSurveyCommand(createWalletDto),
+      new InsertSurveyCommand(createSurveytDto),
     );
     return {
       success: true,
@@ -74,14 +80,14 @@ export class SurveyController {
 
   @Post('/:id')
   async updateSurvey(
-    @Body() updateWalletDto: UpdateSurveytDto,
+    @Body() updateSurveytDto: UpdateSurveytDto,
     @Param(
       'id',
       new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE }),
     )
     id: string,
   ): Promise<SurveyRes> {
-    if (Object.keys(updateWalletDto).length === 0) {
+    if (Object.keys(updateSurveytDto).length === 0) {
       throw new HttpException('Update Object is empty', HttpStatus.BAD_REQUEST);
     }
 
@@ -91,7 +97,7 @@ export class SurveyController {
     }
 
     survey = await this.commandBus.execute(
-      new UpdateSurveyCommand(updateWalletDto, survey),
+      new UpdateSurveyCommand(updateSurveytDto, survey),
     );
 
     return {
@@ -116,5 +122,29 @@ export class SurveyController {
     await this.commandBus.execute(new DeleteSurveyCommand(id));
 
     return { success: true };
+  }
+
+  @Get('/salary/averager')
+  @ApiQuery({ name: 'currency', enum: Currency, required: false })
+  @ApiQuery({ name: 'title', type: String })
+  async getAveragerSalary(
+    @Query('title')
+    title: string,
+    @Query(
+      'currency',
+      new DefaultValuePipe(Currency.HKD),
+      new ParseEnumPipe(Currency, {
+        errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE,
+      }),
+    )
+    currency: Currency = Currency.HKD,
+  ): Promise<AverageSalaryRes> {
+    const average = await this.queryBus.execute(
+      new GetSalaryAveragerQuery(currency, title),
+    );
+    return {
+      currency,
+      average,
+    };
   }
 }

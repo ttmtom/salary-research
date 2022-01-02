@@ -1,5 +1,5 @@
 import { AgeGroup } from '@constants/ageGroup';
-import { Curreny } from '@constants/curreny';
+import { Currency } from '@constants/currency';
 import { ExperienceGroup } from '@constants/experienceGroup';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsNumber, IsEnum } from 'class-validator';
@@ -21,9 +21,9 @@ export class CreateSurveytDto {
   @IsNumber()
   salary: number;
 
-  @ApiProperty({ enum: Curreny })
-  @IsEnum(Curreny)
-  curreny: Curreny;
+  @ApiProperty({ enum: Currency })
+  @IsEnum(Currency)
+  currency: Currency;
 
   @ApiProperty({ type: String, required: false })
   city?: string;

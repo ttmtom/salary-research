@@ -1,4 +1,4 @@
-import { Curreny } from '@constants/curreny';
+import { Currency } from '@constants/currency';
 import { ExperienceGroup } from '@constants/experienceGroup';
 import {
   Entity,
@@ -33,13 +33,13 @@ export class Salary {
 
   @Column({
     type: 'enum',
-    enum: Curreny,
+    enum: Currency,
   })
-  curreny: Curreny;
+  currency: Currency;
 
-  constructor(salary: number, curreny: Curreny) {
+  constructor(salary: number, currency: Currency) {
     this.amount = salary;
-    this.curreny = curreny;
+    this.currency = currency;
   }
 }
 
