@@ -48,6 +48,8 @@ Path                    | Method | description                          | exampl
 ## Database Schema
 ![database schema](public/images/database.jpg)
 
+database volumes: `/dbdata`
+
 ## Script to import data json
 
 ```bash
